@@ -13,62 +13,72 @@ There's no Dockerfile, Kubernetes manifest or pipeline here, and that's on purpo
 1. Have a GitHub account.
 2. [Create an Ankra account](https://platform.ankra.app/auth/signup).
 3. Put your project in a GitHub repository, or press **Use this template** at the top of this page to get your own copy of the guestbook.
+4. Install the Ankra CLI and sign in. On macOS or Linux with Homebrew that's the two lines below. The [CLI page](https://docs.ankra.ai/integrations/ankra-cli) has the other ways.
+
+   ```sh
+   brew install ankraio/tap/ankra
+   ankra login
+   ```
 
 ## On the night
 
-Start the cluster during the food hour. It builds on its own while you eat.
+Start the cluster during the food hour. It takes about a quarter of an hour and builds on its own while you eat.
 
-1. **Get your UpCloud account.** You'll get a code at the door that gives you UpCloud credit. Sign up at [upcloud.com](https://upcloud.com) with it.
+1. **Get your UpCloud account.** You'll get a code at the door that gives you UpCloud credit. Enter it when you sign up at [upcloud.com](https://upcloud.com).
 2. **Create an API token** in the [UpCloud Hub](https://hub.upcloud.com), under **Settings** > **API tokens** (**Account** > **API tokens** on some accounts).
-3. **Create the cluster.** In Ankra, go to **Clusters** > **Create cluster** > **UpCloud**.
-   - On the **Credential & Zone** step, add your UpCloud token and an SSH key. If Ankra generates the key, save the private key, because it's only shown once.
-   - Pick a European zone, such as Helsinki or Frankfurt.
-   - Leave **Include Networking Stack** and **Include Public DNS** on. They give you HTTPS and a free `ankra.cc` address.
-   - Wait for the cluster to show **Online**.
-4. **Let the cluster run your builds.** In **Settings** > **Pipelines**, choose your cluster as the pipeline cluster, set **Pipeline-step workers** to 2 and save.
-5. **Add your application.** Go to [Applications](https://platform.ankra.app/next/applications), press **Add application**, connect GitHub if asked, and pick your repository and branch. Ankra reads the code and opens a setup pull request.
-6. **Review the pull request.** It adds the Dockerfile, the Kubernetes setup and the pipeline, plus a database if your app needs one. The checks build the image, scan it and run the security gate. Merge when they pass.
-7. **Deploy** the application to your cluster and open its HTTPS address.
+3. **Create the cluster.** In Ankra, open **Clusters**, press **Add a cluster**, pick **UpCloud** and then **Ankra managed**.
+   - Under **Where it runs**, press **Add a credential** and paste your UpCloud token. Then press **Add an SSH key** and let Ankra generate one. Download the private key when it's offered, because it's only shown once.
+   - Pick a European zone, such as Helsinki or Stockholm.
+   - For **What will this cluster run?**, choose **Development**.
+   - Keep the sizes and everything under **Advanced configuration** as they are. That gives you HTTPS and a free `ankra.cc` address.
+   - Press **Create cluster** and wait for the cluster to show **Online**.
+4. **Let the cluster run your builds.** Use the name you gave the cluster:
+
+   ```sh
+   ankra org ci-settings set --cluster <cluster-name>
+   ankra cluster agent ci set --workers 2 --cluster <cluster-name>
+   ```
+
+5. **Add your application.** Go to [Applications](https://platform.ankra.app/next/applications), press **New application**, connect GitHub if asked, pick your repository and branch, and press **Connect and prepare**. Ankra reads the code and opens a setup pull request.
+6. **Review the pull request.** It adds the Dockerfile, the Kubernetes setup and the pipeline, plus a database if your app needs one. It stays a draft while its checks build the image, scan it and run the security gate. Merge when they pass.
+7. **Deploy** the application to your cluster from its page in Ankra, and open its HTTPS address.
 8. **Show the room.** Post your address on the [live board](https://github.com/ankraio/ship-on-european-kubernetes/issues/1).
 
 ## Finished early?
 
-These use the Ankra CLI:
-
-```sh
-brew install ankraio/tap/ankra
-ankra login
-```
+These use the Ankra CLI. Your application's id is in the address bar when you have the application open in Ankra, and `ankra application list` prints it too.
 
 **Scale it.** Run three replicas and reload the page to see the pod name change:
 
 ```sh
-ankra application deploy <application-id> --cluster <cluster-id> --mode high_availability --set replicas=3
+ankra application deploy <application-id> --cluster <cluster-name> --set replicas=3
 ```
 
-**Ask Ankra to do it instead:**
-
-```sh
-ankra chat "revise the setup: high availability, 3 replicas" --mode agent
-```
-
-**Ship a change.** Push a commit and follow it through the pipeline:
+**Ship a change.** Push a commit to your main branch. Ankra builds it, scans it and rolls it out on its own. Follow it through the pipeline:
 
 ```sh
 ankra pipeline list --application <application-id>
 ```
 
-**Trip the security scan.** On a branch, add a dependency with a known vulnerability, open a pull request and read what the scan found. In the guestbook:
+**Ask Ankra.** It reads your pods, logs and database and tells you what it found:
 
 ```sh
-go get golang.org/x/text@v0.3.0
-ankra pipeline findings <run-id> --application <application-id>
+ankra chat --cluster <cluster-name> --mode ask "Is my application healthy? Show its pods and its database."
 ```
 
-**Move something bigger.** Point Ankra at a docker-compose project and see the plan for moving it:
+**Trip the security scan.** On a branch, add a dependency with known vulnerabilities, open a pull request and read what the scan found. In the guestbook, with Go installed:
 
 ```sh
-ankra migrate up ./your-project --cluster <cluster-name> --plan
+git checkout -b scan-demo
+go get golang.org/x/text@v0.3.0
+git commit -am "Add a dependency with known vulnerabilities"
+git push -u origin scan-demo
+```
+
+Open the pull request on GitHub, wait for its checks, then take the run's id from `ankra pipeline list` and read the findings:
+
+```sh
+ankra pipeline findings <run-id> --application <application-id>
 ```
 
 ## Afterwards
@@ -77,7 +87,7 @@ The app and the cluster are yours, in your own accounts, and they keep running a
 
 **What it costs.** UpCloud bills you directly for servers, storage and network, and the cluster wizard shows each plan's monthly price. Ankra bills worker vCPUs only: the first 30 are free and control planes are never billed.
 
-**How to stop paying.** **Stop** releases the servers but keeps your storage volumes, which are still billed. **Terminate**, under **Settings** > **General** > **Danger Zone**, deletes the servers, networks, routers, gateways and SSH keys, plus the volumes once you accept that. It removes your data and can't be undone. [More on terminating a cluster](https://docs.ankra.ai/guides/operate-ankra-managed-clusters#terminate-a-cluster).
+**How to stop paying.** Both are in the cluster's **Settings** in Ankra. **Stop cluster** releases the servers but keeps your storage volumes, which are still billed. **Terminate cluster**, under **Danger zone**, deletes the servers, networks, routers, gateways and SSH keys, plus the volumes once you accept that. It removes your data and can't be undone. [More on terminating a cluster](https://docs.ankra.ai/guides/operate-ankra-managed-clusters#terminate-a-cluster).
 
 **Read more:**
 

@@ -86,6 +86,31 @@ CREATE TABLE IF NOT EXISTS entries (
   created TIMESTAMPTZ NOT NULL DEFAULT now()
 );`
 
+// schemaLock is the advisory lock every replica takes before it creates the
+// table. Any fixed number works, as long as all replicas use the same one.
+const schemaLock = 20261124
+
+// migrate creates the table. Every replica runs it on start, so it takes a
+// lock first: when several pods start together, CREATE TABLE IF NOT EXISTS
+// alone lets two of them create the table at the same moment, and the loser
+// exits with a duplicate key error. The lock is released when the
+// transaction ends.
+func migrate(ctx context.Context) error {
+	tx, err := db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	if _, err := tx.ExecContext(ctx, `SELECT pg_advisory_xact_lock($1)`, schemaLock); err != nil {
+		return err
+	}
+	if _, err := tx.ExecContext(ctx, schema); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
 // connect retries because the app almost always starts before the database
 // finishes accepting connections. Crash-looping on that is noise, not signal.
 func connect(ctx context.Context) error {
@@ -102,8 +127,7 @@ func connect(ctx context.Context) error {
 				handle.SetMaxOpenConns(5)
 				handle.SetConnMaxLifetime(5 * time.Minute)
 				db = handle
-				_, err = db.ExecContext(ctx, schema)
-				return err
+				return migrate(ctx)
 			}
 			lastErr = err
 			_ = handle.Close()
