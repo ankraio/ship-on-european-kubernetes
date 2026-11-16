@@ -13,12 +13,6 @@ There's no Dockerfile, Kubernetes manifest or pipeline here, and that's on purpo
 1. Have a GitHub account.
 2. [Create an Ankra account](https://platform.ankra.app/auth/signup).
 3. Put your project in a GitHub repository, or press **Use this template** at the top of this page to get your own copy of the guestbook.
-4. Install the Ankra CLI and sign in. On macOS or Linux with Homebrew that's the two lines below. The [CLI page](https://docs.ankra.ai/integrations/ankra-cli) has the other ways.
-
-   ```sh
-   brew install ankraio/tap/ankra
-   ankra login
-   ```
 
 ## On the night
 
@@ -29,24 +23,24 @@ Start the cluster during the food hour. It takes about a quarter of an hour and 
 3. **Create the cluster.** In Ankra, open **Clusters**, press **Add a cluster**, pick **UpCloud** and then **Ankra managed**.
    - Under **Where it runs**, press **Add a credential** and paste your UpCloud token. Then press **Add an SSH key** and let Ankra generate one. Download the private key when it's offered, because it's only shown once.
    - Pick a European zone, such as Helsinki or Stockholm.
-   - For **What will this cluster run?**, choose **Development**.
+   - For **What will this cluster run?**, choose **Development**. Ankra then builds your code on this cluster too.
    - Keep the sizes and everything under **Advanced configuration** as they are. That gives you HTTPS and a free `ankra.cc` address.
    - Press **Create cluster** and wait for the cluster to show **Online**.
-4. **Let the cluster run your builds.** Use the name you gave the cluster:
-
-   ```sh
-   ankra org ci-settings set --cluster <cluster-name>
-   ankra cluster agent ci set --workers 2 --cluster <cluster-name>
-   ```
-
-5. **Add your application.** Go to [Applications](https://platform.ankra.app/next/applications), press **New application**, connect GitHub if asked, pick your repository and branch, and press **Connect and prepare**. Ankra reads the code and opens a setup pull request.
-6. **Review the pull request.** It adds the Dockerfile, the Kubernetes setup and the pipeline, plus a database if your app needs one. It stays a draft while its checks build the image, scan it and run the security gate. Merge when they pass.
-7. **Deploy** the application to your cluster from its page in Ankra, and open its HTTPS address.
-8. **Show the room.** Post your address on the [live board](https://github.com/ankraio/ship-on-european-kubernetes/issues/1).
+4. **Add your application.** Go to [Applications](https://platform.ankra.app/next/applications), press **New application**, connect GitHub if asked, pick your repository and branch, and press **Connect and prepare**. Ankra reads the code and opens a setup pull request.
+5. **Review the pull request.** It adds the Dockerfile, the Kubernetes setup and the pipeline, plus a database if your app needs one. It stays a draft while its checks build the image, scan it and run the security gate. Merge when they pass.
+6. **Deploy** the application to your cluster from its page in Ankra, and open its HTTPS address.
+7. **Show the room.** Post your address on the [live board](https://github.com/ankraio/ship-on-european-kubernetes/issues/1).
 
 ## Finished early?
 
-These use the Ankra CLI. Your application's id is in the address bar when you have the application open in Ankra, and `ankra application list` prints it too.
+These use the Ankra CLI. On macOS or Linux with Homebrew, the two lines below install it and sign you in. The [CLI page](https://docs.ankra.ai/integrations/ankra-cli) has the other ways.
+
+```sh
+brew install ankraio/tap/ankra
+ankra login
+```
+
+Your application's id is in the address bar when you have the application open in Ankra, and `ankra application list` prints it too.
 
 **Scale it.** Run three replicas and reload the page to see the pod name change:
 
