@@ -22,7 +22,7 @@ Start the cluster during the food hour. It takes about a quarter of an hour and 
 2. **Create an API token** in the [UpCloud Hub](https://hub.upcloud.com), under **Settings** > **API tokens** (**Account** > **API tokens** on some accounts).
 3. **Create the cluster.** In Ankra, open **Clusters**, press **Add a cluster**, pick **UpCloud** and then **Ankra managed**.
    - Under **Where it runs**, press **Add a credential** and paste your UpCloud token. Then press **Add an SSH key** and let Ankra generate one. Download the private key when it's offered, because it's only shown once.
-   - Pick a European zone, such as Helsinki or Stockholm.
+   - Pick the **Warsaw** zone (`pl-waw1`). A new UpCloud account can't use every zone yet, Helsinki for one, and Warsaw works from the start.
    - For **What will this cluster run?**, choose **Development**. Ankra then builds your code on this cluster too.
    - Keep the sizes and everything under **Advanced configuration** as they are. That gives you HTTPS and a free `ankra.cc` address.
    - Press **Create cluster** and wait for the cluster to show **Online**.
