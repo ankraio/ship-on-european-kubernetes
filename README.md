@@ -29,7 +29,7 @@ Start the cluster during the food hour. It takes about a quarter of an hour and 
 4. **Add your application.** Go to [Applications](https://platform.ankra.app/next/applications), press **New application**, connect GitHub if asked, pick your repository and branch, and press **Connect and prepare**. Ankra reads the code and opens a setup pull request.
 5. **Review the pull request.** It adds the Dockerfile, the Kubernetes setup and the pipeline, plus a database if your app needs one. It stays a draft while its checks build the image, scan it and run the security gate. Merge when they pass.
 6. **Deploy** the application to your cluster from its page in Ankra, and open its HTTPS address.
-7. **Show the room.** Post your address on the [live board](https://github.com/ankraio/ship-on-european-kubernetes/issues/1).
+7. **Show the room.** Put your app up on the [live board](https://live.ankra.ai). Its window lights when your HTTPS address answers.
 
 ## Finished early?
 
