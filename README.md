@@ -18,7 +18,7 @@ There's no Dockerfile, Kubernetes manifest or pipeline here, and that's on purpo
 
 Start the cluster during the food hour. It takes about a quarter of an hour and builds on its own while you eat.
 
-1. **Get your UpCloud account.** You'll get a code at the door that gives you UpCloud credit. Enter it when you sign up at [upcloud.com](https://upcloud.com).
+1. **Get your UpCloud account.** You'll get a code at the door that gives you UpCloud credit. Enter it when you [sign up for UpCloud](https://hub.upcloud.com/sso-login/signup?next=/dashboard).
 2. **Create an API token** in the [UpCloud Hub](https://hub.upcloud.com), under **Settings** > **API tokens** (**Account** > **API tokens** on some accounts).
 3. **Create the cluster.** In Ankra, open **Clusters**, press **Add a cluster**, pick **UpCloud** and then **Ankra managed**.
    - Under **Where it runs**, press **Add a credential** and paste your UpCloud token. Then press **Add an SSH key** and let Ankra generate one. Download the private key when it's offered, because it's only shown once.
